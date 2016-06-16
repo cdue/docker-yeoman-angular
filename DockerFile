@@ -24,7 +24,7 @@ RUN groupadd -g ${gid} ${group} \
 
 # install yo (with angular generator), grunt, bower, gulp, etc.
 # you can comment npm clear cache line to build images faster (when you are trying to modify it for example)
-RUN npm install -g grunt-cli bower gulp \
+RUN npm install -g grunt grunt-cli bower gulp \
   && npm install -g karma karma-phantomjs-launcher karma-jasmine jasmine-core phantomjs-prebuilt grunt-karma --save-dev \
   && npm install -g yo generator-karma generator-angular --save-dev \
   && npm cache clear
