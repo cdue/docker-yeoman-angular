@@ -1,0 +1,45 @@
+FROM node:latest
+
+MAINTAINER "Cédric DUE" <cedric.due@gmail.com>
+
+RUN apt-get update && apt-get install -y git \
+  git-core \
+  && rm -rf /var/lib/apt/lists/*
+
+ENV HOME /home/yeoman
+ENV PROJECT_DIR /app
+
+RUN mkdir $PROJECT_DIR && chmod 775 $PROJECT_DIR
+
+ARG user=yeoman
+ARG group=yeoman
+ARG uid=1000
+ARG gid=1000
+
+# Yeoman is run with user `yeoman`, uid = 1000
+# If you bind mount a volume from the host or a data container,
+# ensure you use the same uid
+RUN groupadd -g ${gid} ${group} \
+  && useradd -d "$HOME" -u ${uid} -g ${gid} -m -s /bin/bash ${user}
+
+# install yo (with angular generator), grunt, bower, gulp, etc.
+# you can comment npm clear cache line to build images faster (when you are trying to modify it for example)
+RUN npm install -g grunt-cli bower gulp \
+  && npm install -g karma karma-phantomjs-launcher karma-jasmine jasmine-core phantomjs-prebuilt grunt-karma --save-dev \
+  && npm install -g yo generator-karma generator-angular --save-dev \
+  && npm cache clear
+
+# Add permissions
+RUN chown -R ${user}:${group} "$(npm config get prefix)/lib/node_modules"
+RUN chown -R ${user}:${group} "$(npm config get prefix)/bin"
+RUN chown -R ${user}:${group} "$(npm config get prefix)/share"
+#RUN chown -R ${user}:${group} "$HOME/.npm"
+
+USER ${user}
+WORKDIR $PROJECT_DIR
+
+# Expose the port
+EXPOSE 9000
+EXPOSE 35729
+
+CMD ["/bin/bash"]
